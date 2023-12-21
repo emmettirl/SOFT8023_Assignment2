@@ -13,9 +13,8 @@ client_socket.connect((host, port))
 print(f"HR System {VERSION}")
 
 while True:
-
     while True:
-        emp_id = input("What is the employee id? ")
+        emp_id = input("Please Enter Employee ID (Or enter 0 for logs) ")
         if emp_id == "":
             print("Please enter a valid id. ")
         else:
@@ -28,9 +27,11 @@ while True:
     if response == "True":
         print(f"Found User: {emp_id} ")
         break
-    else:
+    elif response == "False":
         print(f"No User found with id: {emp_id} ")
         print("Please enter a valid id ")
+    else:
+        print(f"{response} ")
 
 
 

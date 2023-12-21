@@ -17,15 +17,19 @@ def handle_client(client_socket, addr):
 
     while True:
         # receive and process employee id
-        employee_id = client_socket.recv(1024).decode()
+        user_input = client_socket.recv(1024).decode()
 
-        if employee_id not in employee_list:
+        if user_input == "0":
+            response = read_file_contents("employee_data_access_log.txt")
+            client_socket.send(response.encode())
+
+
+        if user_input not in employee_list:
             response = "False"
             client_socket.send(response.encode())
         else:
             response = "True"
             client_socket.send(response.encode())
-
 
             break
 
@@ -51,8 +55,8 @@ def handle_client(client_socket, addr):
         # Send message to RabbitMQ
         channel.basic_publish(exchange='',
                               routing_key='employee_data_access_log',
-                              body=employee_id + ", " + str(addr) + ", " + command)
-        print(f"Sent {employee_id} to RabbitMQ")
+                              body=user_input + ", " + str(addr) + ", " + command)
+        print(f"Sent {user_input} to RabbitMQ")
 
         client_socket.send(response.encode())
 
@@ -64,13 +68,13 @@ def append_to_file(message):
     with open("employee_data_access_log.txt", "a") as file:
         file.write(message + "\n")
 
+
 def read_file_contents(file_path):
     try:
         with open(file_path, "r") as file:
             return file.read()
     except FileNotFoundError:
         return "File not found."
-
 
 
 def consume_queue():
