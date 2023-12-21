@@ -3,10 +3,10 @@ import threading
 import pika
 
 
-def handle_client(client_socket, addr):
+def handle_client(c_socket, c_addr):
     employee_list = ["E00123", "E00456", "E00789"]
 
-    print(f"Got a connection from {addr}")
+    print(f"Got a connection from {c_addr}")
 
     # Setup RabbitMQ Connection
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
@@ -17,24 +17,23 @@ def handle_client(client_socket, addr):
 
     while True:
         # receive and process employee id
-        user_input = client_socket.recv(1024).decode()
+        user_input = c_socket.recv(1024).decode()
 
         if user_input == "0":
             response = read_file_contents("employee_data_access_log.txt")
-            client_socket.send(response.encode())
-
+            c_socket.send(response.encode())
 
         if user_input not in employee_list:
             response = "False"
-            client_socket.send(response.encode())
+            c_socket.send(response.encode())
         else:
             response = "True"
-            client_socket.send(response.encode())
+            c_socket.send(response.encode())
 
             break
 
     while True:
-        command = client_socket.recv(1024).decode()
+        command = c_socket.recv(1024).decode()
         print(f"Received command: {command}")
 
         query = command.split(",")
@@ -55,13 +54,13 @@ def handle_client(client_socket, addr):
         # Send message to RabbitMQ
         channel.basic_publish(exchange='',
                               routing_key='employee_data_access_log',
-                              body=user_input + ", " + str(addr) + ", " + command)
+                              body=user_input + ", " + str(c_addr) + ", " + command)
         print(f"Sent {user_input} to RabbitMQ")
 
-        client_socket.send(response.encode())
+        c_socket.send(response.encode())
 
     # Close the connection
-    client_socket.close()
+    c_socket.close()
 
 
 def append_to_file(message):
@@ -83,7 +82,7 @@ def consume_queue():
 
     channel.queue_declare(queue='employee_data_access_log')
 
-    def callback(ch, method, properties, body):
+    def callback(body):
         print(f"Received {body.decode()}")
         append_to_file(body.decode())
 

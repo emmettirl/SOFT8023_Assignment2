@@ -2,12 +2,10 @@ import socket
 
 VERSION = 1.0
 
-# Client setup
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = '127.0.0.1'
 port = 12345
 
-# Connect to the server
 client_socket.connect((host, port))
 
 print(f"HR System {VERSION}")
@@ -22,7 +20,6 @@ while True:
 
     client_socket.send(emp_id.upper().strip().encode())
 
-    # Receive and print the response
     response = client_socket.recv(1024).decode()
     if response == "True":
         print(f"Found User: {emp_id} ")
@@ -33,12 +30,8 @@ while True:
     else:
         print(f"{response} ")
 
-
-
-# get input with input validation
 while True:
     query = ""
-
 
     while True:
         option1 = input("Salary (C) or Annual Leave (L)? ")
@@ -63,22 +56,19 @@ while True:
 
     client_socket.send(query.upper().strip().encode())
 
-    # Receive and print the response
     response = client_socket.recv(1024).decode()
     print(f"Server response: {response}")
 
     while True:
-        sentinal = input("Do you want to continue? (Y/N) ").upper()
-        if sentinal.upper().strip() == "Y" or sentinal.upper().strip() == "YES" or sentinal.upper().strip() == "N" \
-                or sentinal.upper().strip() == "NO":
+        sentinel = input("Do you want to continue? (Y/N) ").upper()
+        if sentinel.upper().strip() == "Y" or sentinel.upper().strip() == "YES" or sentinel.upper().strip() == "N" \
+                or sentinel.upper().strip() == "NO":
             break
         else:
             print("Please enter a valid option ")
 
-    if sentinal.upper().strip() == "N" or sentinal.upper().strip() == "NO":
+    if sentinel.upper().strip() == "N" or sentinel.upper().strip() == "NO":
         break
-
-# Close the connection
 
 query = "exit"
 client_socket.send(query.encode())
