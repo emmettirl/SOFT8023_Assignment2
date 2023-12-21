@@ -1,16 +1,14 @@
-# This is a sample Python script.
+import subprocess
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+client_count = 1
 
+python_interpreter = "C:/Users/emmet/AppData/Local/Programs/Python/Python39/python.exe"
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+script1 = 'server.py'
+script2 = 'client.py'
 
+subprocess.Popen(f'start cmd /k {python_interpreter} {script1}', shell=True)
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+for i in range(client_count):
+    subprocess.Popen(f'start cmd /k {python_interpreter} {script2}', shell=True)
+    sleep = 2
