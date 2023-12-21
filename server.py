@@ -8,15 +8,12 @@ def handle_client(c_socket, c_addr):
 
     print(f"Got a connection from {c_addr}")
 
-    # Setup RabbitMQ Connection
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = connection.channel()
 
-    # Declare a queue
     channel.queue_declare(queue='employee_id_queue')
 
     while True:
-        # receive and process employee id
         user_input = c_socket.recv(1024).decode()
 
         if user_input == "0":
@@ -51,15 +48,12 @@ def handle_client(c_socket, c_addr):
         else:
             response = "Invalid Query"
 
-        # Send message to RabbitMQ
         channel.basic_publish(exchange='',
                               routing_key='employee_data_access_log',
                               body=user_input + ", " + str(c_addr) + ", " + command)
         print(f"Sent {user_input} to RabbitMQ")
 
         c_socket.send(response.encode())
-
-    # Close the connection
     c_socket.close()
 
 
@@ -82,19 +76,18 @@ def consume_queue():
 
     channel.queue_declare(queue='employee_data_access_log')
 
-    def callback(body):
+    def callback(ch, method, properties, body):
         print(f"Received {body.decode()}")
         append_to_file(body.decode())
 
     channel.basic_consume(queue='employee_data_access_log', on_message_callback=callback, auto_ack=True)
 
-    print("Starting to consume from the queue. To exit press CTRL+C")
+    print("Consuming queue")
     channel.start_consuming()
 
-
-# Server setup
+# server
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = '127.0.0.1'  # Localhost
+host = '0.0.0.0'
 port = 12345
 server_socket.bind((host, port))
 server_socket.listen(5)
@@ -104,10 +97,10 @@ print(f"Server listening on {host}:{port}")
 consumer_thread = threading.Thread(target=consume_queue)
 consumer_thread.start()
 
+
+#threads
 while True:
-    # Accept a connection
     client_socket, addr = server_socket.accept()
 
-    # Create a new thread that will handle the client
     client_thread = threading.Thread(target=handle_client, args=(client_socket, addr))
     client_thread.start()
